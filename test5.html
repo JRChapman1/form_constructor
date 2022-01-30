@@ -1,0 +1,145 @@
+<html>
+<head>
+	<title></title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+
+	<form id="new_user_form">
+
+	</form>
+
+	<div style='border: solid 1px black; padding: 30px; float: right;'>
+
+		<input id="new_field"><br><br>
+		<input id="new_field_vals"><br><br>
+		<a id="add_node" href='#'>Add Node</a>
+
+		<br><br><br><br>
+	
+
+		<label for="tmp1">Fields</label><br>
+		<textarea id="tmp1" style="width: 200px; height: 200px;"></textarea><br><br>
+
+
+		<label for="tmp2">Options</label><br>
+		<textarea id="tmp2" style="width: 200px; height: 200px;"></textarea><br><br>
+		
+	</div>
+
+	<script type="text/javascript">
+
+		var form = document.querySelector('form');
+
+		var options = {};
+		var fields = {};
+
+
+		$(document).ready(function() {
+			var current_inputs = {};
+			render_form(current_inputs);
+		});
+
+		form.addEventListener('change', function() {
+			var current_inputs = $("form").serialize();//.replace("%20", " ");
+			render_form(current_inputs, event.target.id);
+		});
+
+		function render_form(current_inputs, caller) {
+
+
+			var tmp_fields = fields;
+			var tmp_options = options;
+
+			$("#new_user_form").html('');
+
+			if(Object.keys(current_inputs).length > 0) {
+
+				$.each(current_inputs.split("&"), function(key, val){
+
+					var tmp_field_name = val.split("=")[0];
+					var tmp_field_val = val.split("=")[1];
+					
+					$('form').append("<p>" + tmp_field_name + "</p><select id='" + tmp_field_name + "' name='" + tmp_field_name + "' value='" + tmp_field_val + "'></select>");
+					$.each(tmp_options, function(key, value) {
+						if(tmp_field_val == key) {
+							$("#" + tmp_field_name).append($("<option selected></option>").attr("value", key).text(key));
+						} else {
+							$("#" + tmp_field_name).append($("<option></option>").attr("value", key).text(key));	
+						}
+			            
+			        });
+
+			        tmp_options = tmp_options[tmp_field_val];
+			        tmp_fields = tmp_fields[tmp_field_name];
+			        tmp_fields = tmp_fields[tmp_field_val];
+
+			        if(tmp_field_name === caller) {
+			        	return false;
+			        }
+
+				});
+			};
+
+			tmp_field_name = Object.keys(tmp_fields);
+			tmp_options = Object.keys(tmp_options);
+
+			if (tmp_options.length > 0) {
+
+				$('form').append("<p>" + tmp_field_name + "</p><select id='" + tmp_field_name + "' name='" + tmp_field_name + "'></select>");
+				$("#"+tmp_field_name).append($("<option selected></option>"));  
+				$.each(tmp_options, function(key, value) {
+					$("#" + tmp_field_name).append($("<option></option>").attr("value", value).text(value));    
+		        });
+
+		    };
+
+		};
+
+
+		$("#add_node").click(function() {
+						
+			var tmp_fields = fields;
+			var tmp_options = options;
+
+			var current_inputs = $("form").serialize().replace("%20", " ");
+
+			var new_field_name = $("#new_field").val()
+			var new_field_vals = $("#new_field_vals").val().split(",");
+
+			if(Object.keys(current_inputs).length > 0) {
+
+				$.each(current_inputs.split("&"), function(key, val){
+
+					var tmp_field_name = val.split("=")[0];
+					var tmp_field_val = val.split("=")[1];
+					
+			        tmp_options = tmp_options[tmp_field_val];
+			        tmp_fields = tmp_fields[tmp_field_name];
+			        tmp_fields = tmp_fields[tmp_field_val];
+
+				});
+			};
+
+		
+			dict_new_field_vals = {};
+			$.each(new_field_vals, function(key, val) {
+				dict_new_field_vals[val] = {};
+				tmp_options[val] = {};
+			});
+			tmp_fields[new_field_name] = dict_new_field_vals;
+
+			render_form({});
+
+			$("#tmp1").val(JSON.stringify(fields));
+			$("#tmp2").val(JSON.stringify(options));
+
+			$("#new_field").val('');
+			$("#new_field_vals").val('');
+
+		});
+
+
+	</script>
+</body>
+</html>
